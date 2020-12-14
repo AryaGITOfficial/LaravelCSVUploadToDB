@@ -18,6 +18,10 @@ class CSVFilesController extends Controller{
         ]);
 
         $file = file($request->file->getRealPath());
+
+        $headerRow = $file->first()->keys()->toArray();
+        $validate = $this->validateHeaderRow($headerRow);
+
         $data = array_slice($file, 1);
         $parts = (array_chunk($data, 1000));
 
@@ -30,7 +34,18 @@ class CSVFilesController extends Controller{
         (new AppCsv_files())->importToDB();
         session()->flash('status','queued for importing.');
         return redirect('/');
-        //dd($file);
+        
+    }
+
+    public function validateHeaderRow($headerRow)
+    {
+        $validate = false;
+
+        if( $headerRow[0] == 'Module_code' && $headerRow[1] == 'Module_name' && $headerRow[2] == 'Module_term' ){
+                $validate = true;
+        } 
+
+        return $validate;
 
     }
 
